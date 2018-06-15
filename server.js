@@ -16,6 +16,8 @@ app.use(function(req, res, next) {
     next();
 })
 
+app.get("/api/message", GetMessages);
+
 app.post("/api/message", function(req, res) {
     console.log(req.body);
     
@@ -25,16 +27,15 @@ app.post("/api/message", function(req, res) {
     res.status(200);
 })
 
-function GetMessages(){
+function GetMessages(req, response) {
     Message.find({}).exec(function(err, result) {
-        console.log(result);
+        response.send(result);
     })
 }
 
 mongoose.connect(url, function(err){
     if(!err){
         console.log("We are connected to Mongo.");
-        GetMessages();
     }
 })
 
