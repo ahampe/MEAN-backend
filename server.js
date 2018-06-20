@@ -2,41 +2,26 @@ var express = require("express");
 var app = express();
 var bodyParser = require("body-parser");
 var mongoose = require("mongoose");
+
+var auth = require("./controllers/auth");
+var message = require("./controllers/message");
+var checkAuthenticated = require("./services/checkAuthenticated");
+var cors = require("./services/cors");
+
 var url = "mongodb://localhost:27017/test";
 
-var Message = mongoose.model("Message", {
-    msg: String
-});
-
+// Middleware
 app.use(bodyParser.json());
+app.use(cors);
 
-app.use(function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-    next();
-})
+// Requests
+app.get("/api/message", message.get);
 
-app.get("/api/message", GetMessages);
+app.post("/api/message", checkAuthenticated, message.post);
 
-app.post("/api/message", function(req, res) {
-    console.log(req.body);
-    
-    var message = new Message(req.body);
-    message.save();
+app.post('/auth/register', auth.register);
 
-    res.status(200);
-})
-
-app.post('/auth/register', function(req, res) {
-    console.log(req.body);
-})
-
-function GetMessages(req, response) {
-    Message.find({}).exec(function(err, result) {
-        response.send(result);
-    })
-}
-
+// Connection
 mongoose.connect(url, function(err){
     if(!err){
         console.log("We are connected to Mongo.");
